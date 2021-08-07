@@ -9,6 +9,7 @@ import (
 )
 
 type Command_t int
+
 const (
 	Exit = iota
 	Pause
@@ -36,11 +37,12 @@ func generateHelp(source [][]string) string {
 }
 
 const (
-	FramePerSec = 44100  // SampleRate
-	BytesPerFrame = 4
+	FramePerSec      = 44100 // SampleRate
+	BytesPerFrame    = 4
 	OneFragmentBytes = FramePerSec * BytesPerFrame / 4
 )
-var HelpText = generateHelp([][]string {
+
+var HelpText = generateHelp([][]string{
 	{"e[xit]|q[uit]", "Quit this player"},
 	{"p[ause]", "Pause music (valid only when playing)"},
 	{"r[esume]", "Cancel pausing (valid only when pausing)"},
@@ -50,12 +52,13 @@ var HelpText = generateHelp([][]string {
 
 //go:embed FivePre.dmp3
 var PreMusic []byte
+
 //go:embed FiveLoop.dmp3
 var LoopMusic []byte
 
 type Music struct {
 	Content []byte
-	Index uint32
+	Index   uint32
 }
 
 func (m *Music) length() uint32 {
@@ -64,11 +67,11 @@ func (m *Music) length() uint32 {
 
 func (m *Music) playFragment(p *oto.Player) error {
 	var to_write []byte
-	if ((m.Index + OneFragmentBytes) >= m.length()) {
-		to_write = m.Content[m.Index :]
+	if (m.Index + OneFragmentBytes) >= m.length() {
+		to_write = m.Content[m.Index:]
 		m.Index = m.length()
 	} else {
-		to_write = m.Content[m.Index : m.Index + OneFragmentBytes]
+		to_write = m.Content[m.Index : m.Index+OneFragmentBytes]
 		m.Index += OneFragmentBytes
 	}
 	_, err := p.Write(to_write)
@@ -85,7 +88,7 @@ func (m *Music) EOF() bool {
 func play(ch <-chan Command_t, done chan<- bool, reterr chan<- error) {
 	c, err := oto.NewContext(FramePerSec, 2, 2, OneFragmentBytes)
 	if err != nil {
-		reterr<- err
+		reterr <- err
 		return
 	}
 	p := c.NewPlayer()
@@ -182,8 +185,8 @@ func run() error {
 			fmt.Println(HelpText)
 		}
 
-		ch<- command
-		<-done  // Wait for processing
+		ch <- command
+		<-done // Wait for processing
 		select {
 		case e := <-err:
 			return e

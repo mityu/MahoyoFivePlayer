@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"io"
-    "fmt"
 	"os"
 
 	"github.com/hajimehoshi/go-mp3"
@@ -14,7 +14,7 @@ func copyBytes(o []byte, d io.Reader) error {
 
 	fmt.Printf("Start to copy %d bytes...\n", l)
 	for {
-		n, err := d.Read(o[i :])
+		n, err := d.Read(o[i:])
 		i += n
 		if err != nil {
 			return err
@@ -27,7 +27,7 @@ func copyBytes(o []byte, d io.Reader) error {
 }
 
 const (
-	FramePerSec = 44100
+	FramePerSec   = 44100
 	BytesPerFrame = 4
 )
 
@@ -39,15 +39,14 @@ func transport(audio_file string) {
 	}
 	defer f.Close()
 
-    mp3, err := mp3.NewDecoder(f)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
+	mp3, err := mp3.NewDecoder(f)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-
-	pre := make([]byte, FramePerSec / 100 * BytesPerFrame * (13200 + 45))
-	loop := make([]byte, FramePerSec / 100 * BytesPerFrame * (10300 + 40))
+	pre := make([]byte, FramePerSec/100*BytesPerFrame*(13200+45))
+	loop := make([]byte, FramePerSec/100*BytesPerFrame*(10300+40))
 
 	copyBytes(pre, mp3)
 	copyBytes(loop, mp3)
